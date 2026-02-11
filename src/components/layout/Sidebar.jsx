@@ -114,12 +114,12 @@ export function Sidebar({ collapsed, setCollapsed, onNewItem }) {
             )}>
                 {collapsed && !showMobileClose ? (
                     <div className="flex flex-col items-center gap-6">
-                        <div
+                        <motion.div
                             layoutId="sidebar-logo"
                             className="text-zinc-900 pt-10 dark:text-zinc-100"
                         >
                             <Command className="w-5 h-5" strokeWidth={2.5} />
-                        </div>
+                        </motion.div>
                         <Button
                             variant="ghost"
                             size="icon"
@@ -163,7 +163,7 @@ export function Sidebar({ collapsed, setCollapsed, onNewItem }) {
             </div>
 
             {/* New Capture Button */}
-            <div className="px-3 py-4">
+            < div className="px-3 py-4" >
                 <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                     <Button
                         onClick={() => onNewItem('video')}
@@ -176,16 +176,16 @@ export function Sidebar({ collapsed, setCollapsed, onNewItem }) {
                         {(!collapsed || showMobileClose) && <span className="text-sm font-bold tracking-tight">New Item</span>}
                     </Button>
                 </motion.div>
-            </div>
+            </div >
 
             {/* Navigation */}
-            <nav className="flex-1 px-3 space-y-1.5 py-4">
+            < nav className="flex-1 px-3 space-y-1.5 py-4" >
                 <NavItem to="/" icon={LayoutGrid} label="Everything" badge={activeCount} />
                 <NavItem to="/settings" icon={Settings} label="Settings" />
-            </nav>
+            </nav >
 
             {/* Bottom Section */}
-            <div className="mt-auto p-3">
+            < div className="mt-auto p-3" >
                 {(!collapsed || showMobileClose) ? (
                     <motion.div
                         initial={{ opacity: 0, y: 10 }}
@@ -224,8 +224,9 @@ export function Sidebar({ collapsed, setCollapsed, onNewItem }) {
                         </div>
                         <div className="h-1.5 w-1.5 rounded-full bg-emerald-500/50" />
                     </div>
-                )}
-            </div>
+                )
+                }
+            </div >
         </>
     );
 

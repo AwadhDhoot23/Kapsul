@@ -261,7 +261,6 @@ export default function Dashboard() {
         >
             {filteredAndSortedItems.map(item => {
                 const cardProps = {
-                    key: item.id,
                     ...item,
                     onPin: (id) => updateItem(id, { isPinned: !item.isPinned }),
                     onDelete: (id) => { if (confirm('Delete?')) deleteItem(id); },
