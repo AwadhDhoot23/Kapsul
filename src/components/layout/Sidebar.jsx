@@ -190,25 +190,25 @@ export function Sidebar({ collapsed, setCollapsed, onNewItem }) {
                     <motion.div
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="p-4 sm:p-5 rounded-2xl bg-zinc-50 dark:bg-zinc-900/40 border border-zinc-200 dark:border-zinc-800/50 space-y-3 sm:space-y-4 shadow-sm overflow-hidden"
+                        className="p-3 sm:p-5 rounded-xl sm:rounded-2xl bg-zinc-50 dark:bg-zinc-900/40 border border-zinc-200 dark:border-zinc-800/50 space-y-2 sm:space-y-4 shadow-sm overflow-hidden"
                     >
-                        <div className="flex items-center justify-between">
+                        <div className="flex items-center justify-between mb-1 sm:mb-0">
                             <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Status</span>
                             <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
                         </div>
-                        <div className="space-y-2 sm:space-y-3">
-                            <div className="flex items-center justify-between text-[11px] sm:text-xs">
+                        <div className="space-y-1.5 sm:space-y-3">
+                            <div className="flex items-center justify-between text-[10px] sm:text-xs">
                                 <span className="text-zinc-500 font-bold whitespace-nowrap">Total Vault</span>
                                 <span className="font-black text-zinc-900 dark:text-zinc-100">{totalItems}</span>
                             </div>
-                            <div className="flex items-center justify-between text-[11px] sm:text-xs">
+                            <div className="flex items-center justify-between text-[10px] sm:text-xs">
                                 <div className="flex items-center gap-1.5 sm:gap-2 text-zinc-500 font-bold whitespace-nowrap">
                                     <div className="w-1.5 h-1.5 rounded-full bg-red-500" />
                                     <span>Active</span>
                                 </div>
                                 <span className="font-black text-zinc-900 dark:text-zinc-100">{activeCount}</span>
                             </div>
-                            <div className="flex items-center justify-between text-[11px] sm:text-xs">
+                            <div className="flex items-center justify-between text-[10px] sm:text-xs">
                                 <div className="flex items-center gap-1.5 sm:gap-2 text-zinc-500 font-bold whitespace-nowrap">
                                     <div className="w-1.5 h-1.5 rounded-full bg-blue-500" />
                                     <span>Completed</span>
