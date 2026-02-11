@@ -455,8 +455,8 @@ export function FocusMode({ item, onClose }) {
             <DialogContent className={cn(
                 "p-0 gap-0 border-0 outline-none [&>button]:hidden overflow-hidden", // Hide default shadcn close button
                 isNote
-                    ? "max-w-[95vw] w-[95vw] h-[90vh] bg-white dark:bg-zinc-950"
-                    : "max-w-5xl h-[85vh] max-h-[90vh] bg-white dark:bg-zinc-950 backdrop-blur-xl border border-zinc-200 dark:border-zinc-800 flex flex-col"
+                    ? "max-w-[95vw] w-[95vw] h-[100dvh] sm:h-[90vh] bg-white dark:bg-zinc-950 flex flex-col"
+                    : "max-w-5xl w-full h-[100dvh] sm:h-[85vh] sm:max-h-[90vh] bg-white dark:bg-zinc-950 backdrop-blur-xl border border-zinc-200 dark:border-zinc-800 flex flex-col"
             )}>
                 <DialogTitle className="sr-only">
                     {item.title || 'Focus Mode'}

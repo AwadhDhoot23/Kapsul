@@ -262,9 +262,9 @@ export function SmartCaptureModal({ isOpen, onClose, initialTab }) {
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent className="sm:max-w-[680px] max-h-[90vh] overflow-hidden p-0 border-2 bg-white dark:bg-black shadow-[0_20px_80px_rgba(0,0,0,0.3)] dark:shadow-[0_20px_80px_rgba(255,255,255,0.15)] border-zinc-900 dark:border-zinc-100">
+            <DialogContent className="sm:max-w-[680px] w-full h-[100dvh] sm:h-auto sm:max-h-[85vh] p-0 border-0 sm:border-2 bg-white dark:bg-black shadow-none sm:shadow-[0_20px_80px_rgba(0,0,0,0.3)] sm:dark:shadow-[0_20px_80px_rgba(255,255,255,0.15)] border-zinc-900 dark:border-zinc-100 flex flex-col">
                 {/* Premium Header - Unchanged */}
-                <DialogHeader className="px-5 sm:px-8 pt-6 sm:pt-8 pb-4 sm:pb-6 border-b-2 border-zinc-900 dark:border-zinc-100">
+                <DialogHeader className="px-5 sm:px-8 pt-6 sm:pt-8 pb-4 sm:pb-6 border-b-2 border-zinc-900 dark:border-zinc-100 shrink-0">
                     <DialogTitle className="text-2xl sm:text-4xl font-serif font-black text-zinc-950 dark:text-zinc-50 tracking-tighter leading-none">
                         Smart Capture
                     </DialogTitle>
@@ -274,7 +274,7 @@ export function SmartCaptureModal({ isOpen, onClose, initialTab }) {
                 </DialogHeader>
 
                 {/* Main Content */}
-                <div className="px-5 sm:px-8 py-5 sm:py-8 space-y-6 sm:space-y-8 max-h-[calc(90vh-180px)] sm:max-h-[calc(90vh-240px)] overflow-y-auto custom-scrollbar">
+                <div className="flex-1 overflow-y-auto custom-scrollbar px-5 sm:px-8 py-5 sm:py-8 space-y-6 sm:space-y-8">
                     {/* Tabs with Clean Minimalist Design (Apple-like) */}
                     <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
                         <TabsList className="flex w-full bg-transparent p-0 border-b border-zinc-200 dark:border-zinc-800">

@@ -63,7 +63,7 @@ export function BaseCard({
                 {onSelect && (
                     <div className={cn(
                         "transition-opacity duration-200",
-                        isSelected || selectionMode ? "opacity-100" : "opacity-100 lg:opacity-0 lg:group-hover:opacity-100"
+                        isSelected || selectionMode ? "opacity-100" : "opacity-100 xl:opacity-0 xl:group-hover:opacity-100"
                     )}>
                         <div className="bg-white/90 dark:bg-zinc-900/90 backdrop-blur-sm rounded p-1.5 border border-zinc-200 dark:border-zinc-800 shadow-sm">
                             <Checkbox
@@ -82,7 +82,7 @@ export function BaseCard({
             {/* Bottom-Right 3-Dot Menu */}
             <div className={cn(
                 "absolute bottom-2 right-2 z-10 card-action transition-opacity duration-200",
-                "opacity-100 lg:opacity-0 lg:group-hover:opacity-100"
+                "opacity-100 xl:opacity-0 xl:group-hover:opacity-100"
             )}>
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>

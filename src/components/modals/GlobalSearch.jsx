@@ -204,14 +204,14 @@ export function GlobalSearch({ isOpen, onClose, onOpenCapture, onFocusItem }) {
     return (
         <>
             <Dialog open={isOpen} onOpenChange={onClose}>
-                <DialogContent className="sm:max-w-4xl p-0 gap-0 border-2 border-zinc-900 dark:border-zinc-100 bg-zinc-50 dark:bg-zinc-950 overflow-hidden shadow-2xl">
+                <DialogContent className="sm:max-w-4xl w-full h-[100dvh] sm:h-auto sm:max-h-[85vh] p-0 gap-0 border-0 sm:border-2 border-zinc-900 dark:border-zinc-100 bg-zinc-50 dark:bg-zinc-950 overflow-hidden shadow-none sm:shadow-2xl flex flex-col">
                     <div className="sr-only">
                         <DialogTitle>Search</DialogTitle>
                         <DialogDescription>Search your knowledge base</DialogDescription>
                     </div>
 
                     {/* Search Input Area */}
-                    <div className="flex items-center gap-3 sm:gap-4 px-4 sm:px-6 py-4 sm:py-5 border-b-2 border-zinc-200 dark:border-zinc-800 bg-white dark:bg-black relative z-10">
+                    <div className="flex items-center gap-3 sm:gap-4 px-4 sm:px-6 py-4 sm:py-5 border-b-2 border-zinc-200 dark:border-zinc-800 bg-white dark:bg-black relative z-10 shrink-0">
                         <button
                             onClick={onClose}
                             className="sm:hidden p-2 -ml-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-900 dark:text-zinc-100 transition-colors"
@@ -252,7 +252,7 @@ export function GlobalSearch({ isOpen, onClose, onOpenCapture, onFocusItem }) {
 
 
                     {/* Content Area */}
-                    <div className="p-6 overflow-y-auto max-h-[60vh] min-h-[420px] custom-scrollbar bg-zinc-50/50 dark:bg-zinc-950/50 relative">
+                    <div className="flex-1 p-6 overflow-y-auto custom-scrollbar bg-zinc-50/50 dark:bg-zinc-950/50 relative">
                         <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none" />
 
                         <AnimatePresence mode="wait">

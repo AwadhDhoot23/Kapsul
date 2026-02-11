@@ -320,7 +320,7 @@ export default function Dashboard() {
                                     transition={{ duration: 0.2, ease: "easeOut" }}
                                     className="mb-8 overflow-hidden sticky top-32 z-30"
                                 >
-                                    <div className="w-full flex items-center justify-between p-2 pl-4 pr-1 sm:pr-2 rounded-2xl bg-white/80 dark:bg-zinc-900/80 backdrop-blur-xl border border-zinc-200 dark:border-zinc-800 shadow-xl overflow-hidden">
+                                    <div className="w-full flex flex-wrap sm:flex-nowrap items-center justify-between gap-y-2 p-1.5 pl-3 pr-1 sm:p-2 sm:pl-4 sm:pr-2 rounded-2xl bg-white/80 dark:bg-zinc-900/80 backdrop-blur-xl border border-zinc-200 dark:border-zinc-800 shadow-xl overflow-hidden">
                                         <div className="flex items-center gap-2 sm:gap-4 overflow-hidden">
                                             <div className="flex items-center gap-2 sm:gap-3">
                                                 <div className="flex items-center justify-center h-8 min-w-[2rem] px-2 rounded-lg bg-zinc-900 dark:bg-zinc-100 text-zinc-100 dark:text-zinc-900 shadow-sm">
