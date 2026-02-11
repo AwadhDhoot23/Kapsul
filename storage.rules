@@ -1,0 +1,28 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+    
+    // Helper function to check if user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    // Helper function to check file size (max 10MB)
+    function isValidSize() {
+      return request.resource.size < 10 * 1024 * 1024;
+    }
+    
+    // User-specific storage - users can only access their own files
+    match /users/{userId}/{allPaths=**} {
+      allow read: if isAuthenticated() && request.auth.uid == userId;
+      allow create: if isAuthenticated() && 
+                       request.auth.uid == userId && 
+                       isValidSize();
+      allow update: if isAuthenticated() && 
+                       request.auth.uid == userId && 
+                       isValidSize();
+      allow delete: if isAuthenticated() && request.auth.uid == userId;
+    }
+  }
+}
