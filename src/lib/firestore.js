@@ -175,6 +175,20 @@ export const deleteItem = async (itemId) => {
     }
 };
 
+export const deleteAllUserItems = async (uid) => {
+    try {
+        const itemsRef = collection(db, 'items');
+        const q = query(itemsRef, where('userId', '==', uid));
+        const snapshot = await getDocs(q);
+
+        const deletePromises = snapshot.docs.map(doc => deleteDoc(doc.ref));
+        await Promise.all(deletePromises);
+    } catch (error) {
+        console.error('Error deleting all user items:', error);
+        throw error;
+    }
+};
+
 
 
 // ========== FEEDBACK OPERATIONS ==========

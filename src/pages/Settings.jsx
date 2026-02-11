@@ -120,8 +120,23 @@ export default function Settings() {
         );
     };
 
-    const handleDeleteAll = () => {
-        toast.error("This is a demo action. Data remains safe.");
+    const handleDeleteAll = async () => {
+        if (!user?.uid) return;
+
+        if (window.confirm("ARE YOU SURE?\n\nThis will permanently delete ALL your captured items. This action cannot be undone.")) {
+            try {
+                const { deleteAllUserItems } = await import('@/lib/firestore');
+                await deleteAllUserItems(user.uid);
+                toast.success("Vault purged successfully");
+                // Force a small delay to ensure firestore propagation before redirect
+                setTimeout(() => {
+                    navigate('/');
+                }, 500);
+            } catch (error) {
+                console.error("Purge failed:", error);
+                toast.error("Failed to purge vault. Please try again.");
+            }
+        }
     };
 
     const containerVariants = {

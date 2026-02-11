@@ -179,56 +179,84 @@ export function Sidebar({ collapsed, setCollapsed, onNewItem }) {
             </div >
 
             {/* Navigation */}
-            < nav className="flex-1 px-3 space-y-1.5 py-4" >
+            <nav className="flex-1 px-3 space-y-1.5 py-4 overflow-y-auto custom-scrollbar">
                 <NavItem to="/" icon={LayoutGrid} label="Everything" badge={activeCount} />
                 <NavItem to="/settings" icon={Settings} label="Settings" />
-            </nav >
 
-            {/* Bottom Section */}
-            < div className="mt-auto p-3" >
-                {(!collapsed || showMobileClose) ? (
-                    <motion.div
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="p-3 sm:p-5 rounded-xl sm:rounded-2xl bg-zinc-50 dark:bg-zinc-900/40 border border-zinc-200 dark:border-zinc-800/50 space-y-2 sm:space-y-4 shadow-sm overflow-hidden"
-                    >
-                        <div className="flex items-center justify-between mb-1 sm:mb-0">
-                            <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Status</span>
-                            <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                        </div>
-                        <div className="space-y-1.5 sm:space-y-3">
-                            <div className="flex items-center justify-between text-[10px] sm:text-xs">
-                                <span className="text-zinc-500 font-bold whitespace-nowrap">Total Vault</span>
-                                <span className="font-black text-zinc-900 dark:text-zinc-100">{totalItems}</span>
-                            </div>
-                            <div className="flex items-center justify-between text-[10px] sm:text-xs">
-                                <div className="flex items-center gap-1.5 sm:gap-2 text-zinc-500 font-bold whitespace-nowrap">
-                                    <div className="w-1.5 h-1.5 rounded-full bg-red-500" />
-                                    <span>Active</span>
-                                </div>
-                                <span className="font-black text-zinc-900 dark:text-zinc-100">{activeCount}</span>
-                            </div>
-                            <div className="flex items-center justify-between text-[10px] sm:text-xs">
-                                <div className="flex items-center gap-1.5 sm:gap-2 text-zinc-500 font-bold whitespace-nowrap">
-                                    <div className="w-1.5 h-1.5 rounded-full bg-blue-500" />
-                                    <span>Completed</span>
-                                </div>
-                                <span className="font-black text-zinc-900 dark:text-zinc-100">{completedCount}</span>
-                            </div>
-                        </div>
-                    </motion.div>
-                ) : (
-                    <div className="flex flex-col items-center gap-4 py-4">
-                        <div className="w-10 h-10 rounded-xl bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-100 dark:border-zinc-800 flex items-center justify-center text-zinc-400 group-hover:text-zinc-900 transition-colors">
-                            <Zap className="w-5 h-5 opacity-40" />
-                        </div>
-                        <div className="h-1.5 w-1.5 rounded-full bg-emerald-500/50" />
+                {/* Mobile Status Widget (Visible only on mobile, below settings) */}
+                {(!collapsed || showMobileClose) && (
+                    <div className="sm:hidden pt-4 pb-2">
+                        <StatusWidget
+                            total={totalItems}
+                            active={activeCount}
+                            completed={completedCount}
+                            collapsed={false} // Always expanded in mobile nav view
+                            className="bg-zinc-50 dark:bg-zinc-900/40 border border-zinc-200 dark:border-zinc-800/50"
+                        />
                     </div>
-                )
-                }
-            </div >
+                )}
+            </nav>
+
+            {/* Bottom Section (Desktop Only) */}
+            <div className="hidden sm:block mt-auto p-3">
+                <StatusWidget
+                    total={totalItems}
+                    active={activeCount}
+                    completed={completedCount}
+                    collapsed={collapsed && !showMobileClose}
+                />
+            </div>
         </>
     );
+
+    function StatusWidget({ total, active, completed, collapsed, className }) {
+        if (collapsed) {
+            return (
+                <div className="flex flex-col items-center gap-4 py-4">
+                    <div className="w-10 h-10 rounded-xl bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-100 dark:border-zinc-800 flex items-center justify-center text-zinc-400 group-hover:text-zinc-900 transition-colors">
+                        <Zap className="w-5 h-5 opacity-40" />
+                    </div>
+                    <div className="h-1.5 w-1.5 rounded-full bg-emerald-500/50" />
+                </div>
+            );
+        }
+
+        return (
+            <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className={cn(
+                    "p-3 sm:p-4 rounded-xl sm:rounded-2xl space-y-2 sm:space-y-4 shadow-sm overflow-hidden",
+                    className || "bg-zinc-50 dark:bg-zinc-900/40 border border-zinc-200 dark:border-zinc-800/50"
+                )}
+            >
+                <div className="flex items-center justify-between mb-1 sm:mb-0">
+                    <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Status</span>
+                    <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                </div>
+                <div className="space-y-1.5 sm:space-y-3">
+                    <div className="flex items-center justify-between text-[10px] sm:text-xs">
+                        <span className="text-zinc-500 font-bold whitespace-nowrap">Total Vault</span>
+                        <span className="font-black text-zinc-900 dark:text-zinc-100">{total}</span>
+                    </div>
+                    <div className="flex items-center justify-between text-[10px] sm:text-xs">
+                        <div className="flex items-center gap-1.5 sm:gap-2 text-zinc-500 font-bold whitespace-nowrap">
+                            <div className="w-1.5 h-1.5 rounded-full bg-red-500" />
+                            <span>Active</span>
+                        </div>
+                        <span className="font-black text-zinc-900 dark:text-zinc-100">{active}</span>
+                    </div>
+                    <div className="flex items-center justify-between text-[10px] sm:text-xs">
+                        <div className="flex items-center gap-1.5 sm:gap-2 text-zinc-500 font-bold whitespace-nowrap">
+                            <div className="w-1.5 h-1.5 rounded-full bg-blue-500" />
+                            <span>Completed</span>
+                        </div>
+                        <span className="font-black text-zinc-900 dark:text-zinc-100">{completed}</span>
+                    </div>
+                </div>
+            </motion.div>
+        );
+    }
 
     return (
         <>
