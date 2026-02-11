@@ -260,8 +260,9 @@ export default function Dashboard() {
             columnClassName="pl-4 bg-clip-padding"
         >
             {filteredAndSortedItems.map(item => {
+                const { key, ...restItem } = item;
                 const cardProps = {
-                    ...item,
+                    ...restItem,
                     onPin: (id) => updateItem(id, { isPinned: !item.isPinned }),
                     onDelete: (id) => { if (confirm('Delete?')) deleteItem(id); },
                     onMarkComplete: (id) => updateItem(id, { isCompleted: !item.isCompleted }),
