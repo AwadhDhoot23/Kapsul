@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
+import { motion } from 'framer-motion';
 import {
     Dialog,
     DialogContent,
@@ -70,7 +71,7 @@ function MediaFocusView({ item, onClose, onUpdate, onDelete }) {
     };
 
     return (
-        <div className="flex flex-col h-full max-h-[85vh]">
+        <div className="flex flex-col h-full max-h-[85vh] bg-white dark:bg-zinc-950">
             {/* Close Button */}
             <button
                 onClick={onClose}
@@ -89,59 +90,45 @@ function MediaFocusView({ item, onClose, onUpdate, onDelete }) {
                             className="w-full h-full object-cover"
                         />
                     ) : (
-                        <div className={`w-full h-full flex items-center justify-center p-12 ${item.type === 'link'
-                            ? 'bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500'
-                            : 'bg-gradient-to-br from-zinc-800 to-zinc-900'
-                            }`}>
-                            {item.type === 'video' && <Video className="w-20 h-20 text-white/50" />}
-                            {item.type === 'playlist' && <ListVideo className="w-20 h-20 text-white/50" />}
+                        <div className={`w-full h-full flex items-center justify-center p-12 overflow-hidden relative bg-zinc-950`}>
+                            {/* Dotted Pattern Background */}
+                            <div className="absolute inset-0 z-0 opacity-[0.1]" style={{
+                                backgroundImage: 'radial-gradient(#ffffff 1px, transparent 1px)',
+                                backgroundSize: '24px 24px'
+                            }}></div>
+
+                            {/* Light Reflecting Animation (Cinematic Sweep) */}
+                            <motion.div
+                                animate={{
+                                    x: ['-200%', '200%'],
+                                }}
+                                transition={{
+                                    duration: 2,
+                                    repeat: Infinity,
+                                    ease: "circOut",
+                                    repeatDelay: 4
+                                }}
+                                className="absolute inset-0 z-10 bg-gradient-to-r from-transparent via-white/[0.08] to-transparent -skew-x-20"
+                            />
+
+                            {/* Typographic Link Focus */}
                             {item.type === 'link' && (
-                                <div className="text-center">
-                                    {item.domain ? (
-                                        <img
-                                            src={`https://www.google.com/s2/favicons?domain=${item.domain}&sz=128`}
-                                            alt={item.domain}
-                                            className="w-24 h-24 mx-auto mb-4 drop-shadow-2xl rounded-xl"
-                                            onError={(e) => e.target.style.display = 'none'}
-                                        />
-                                    ) : (
-                                        <LinkIcon className="w-20 h-20 text-white/80 mx-auto mb-4" />
-                                    )}
-                                    <h3 className="text-2xl font-serif font-bold text-white drop-shadow-md line-clamp-2">
-                                        {item.title}
-                                    </h3>
+                                <div className="relative z-20 text-center max-w-2xl px-6">
                                     {item.domain && (
-                                        <p className="text-white/80 font-medium mt-2">{item.domain}</p>
+                                        <p className="text-zinc-500 font-bold text-sm tracking-[0.4em] uppercase opacity-60">
+                                            {item.domain}
+                                        </p>
                                     )}
                                 </div>
                             )}
+
                         </div>
                     )}
 
-                    {/* Type indicator badge */}
-                    <div className="absolute top-4 left-4">
-                        <Badge className="bg-black/80 text-white border-white/20 backdrop-blur-sm shadow-sm">
-                            {item.type === 'video' && 'Video'}
-                            {item.type === 'playlist' && 'Playlist'}
-                            {item.type === 'link' && 'Link'}
-                        </Badge>
-                    </div>
-
-                    {/* YouTube Logo for videos and playlists */}
-                    {(item.type === 'video' || item.type === 'playlist') && (
-                        <div className="absolute top-4 right-4">
-                            <div className="bg-white rounded px-2 py-1 flex items-center gap-1.5">
-                                <svg className="w-6 h-6" viewBox="0 0 24 24" fill="#FF0000">
-                                    <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
-                                </svg>
-                                <span className="text-xs font-semibold text-zinc-900">YouTube</span>
-                            </div>
-                        </div>
-                    )}
                 </div>
 
                 <div className="max-w-4xl mx-auto space-y-6">
-                    {/* Title */}
+                    {/* Main Title Below Media */}
                     <h1 className="text-4xl font-serif font-bold text-zinc-900 dark:text-zinc-100 leading-tight">
                         {item.title}
                     </h1>
@@ -151,9 +138,6 @@ function MediaFocusView({ item, onClose, onUpdate, onDelete }) {
                         {/* Channel Info */}
                         {(item.channel || item.channelTitle) && (
                             <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center text-zinc-900 dark:text-zinc-100 font-serif font-bold border border-zinc-200 dark:border-zinc-700">
-                                    {(item.channel || item.channelTitle).charAt(0).toUpperCase()}
-                                </div>
                                 <div>
                                     <p className="text-base font-semibold text-zinc-900 dark:text-zinc-100">
                                         {item.channel || item.channelTitle}
@@ -171,25 +155,18 @@ function MediaFocusView({ item, onClose, onUpdate, onDelete }) {
                         <div className="flex flex-wrap items-center gap-4 text-sm text-zinc-600 dark:text-zinc-400">
                             {item.domain && (
                                 <div className="flex items-center gap-2">
-                                    <LinkIcon className="w-4 h-4" />
                                     <span>{item.domain}</span>
                                 </div>
                             )}
                             {item.duration && (
                                 <div className="flex items-center gap-2">
-                                    <Clock className="w-4 h-4" />
                                     <span>{formatDuration(item.duration)}</span>
                                 </div>
                             )}
                             {item.videoCount && (
-                                <div className="flex items-center gap-2">
-                                    <ListVideo className="w-4 h-4" />
-
-                                    <span>{item.videoCount} videos</span>
-                                </div>
+                                <span>{item.videoCount} videos</span>
                             )}
                             <div className="flex items-center gap-2">
-                                <Clock className="w-4 h-4" />
                                 <span>{formatRelativeTime(item.createdAt)}</span>
                             </div>
                         </div>
@@ -199,7 +176,6 @@ function MediaFocusView({ item, onClose, onUpdate, onDelete }) {
                     <div className="border-t border-b border-zinc-200 dark:border-zinc-800 py-4">
                         <div className="flex items-center justify-between mb-3">
                             <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 flex items-center gap-2">
-                                <TagIcon className="w-4 h-4" />
                                 Tags
                             </h3>
                         </div>
@@ -372,7 +348,7 @@ function NoteFocusView({ item, onClose }) {
     };
 
     return (
-        <div className="flex flex-col h-full max-h-[90vh]">
+        <div className="flex flex-col h-full max-h-[90vh] bg-white dark:bg-zinc-950">
             {/* Header Bar */}
             <div className="border-b border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 px-6 py-4 flex items-center justify-between">
                 <div className="flex-1 flex items-center gap-4">
@@ -476,8 +452,10 @@ export function FocusMode({ item, onClose }) {
     return (
         <Dialog open={!!item} onOpenChange={onClose}>
             <DialogContent className={cn(
-                "p-0 gap-0 border-0 outline-none [&>button]:hidden", // Hide default shadcn close button
-                isNote ? "max-w-[95vw] w-[95vw] h-[90vh]" : "max-w-5xl bg-zinc-950/90 backdrop-blur-xl border-zinc-800"
+                "p-0 gap-0 border-0 outline-none [&>button]:hidden overflow-hidden", // Hide default shadcn close button
+                isNote
+                    ? "max-w-[95vw] w-[95vw] h-[90vh] bg-white dark:bg-zinc-950"
+                    : "max-w-5xl bg-white dark:bg-zinc-950 backdrop-blur-xl border border-zinc-200 dark:border-zinc-800"
             )}>
                 <DialogTitle className="sr-only">
                     {item.title || 'Focus Mode'}

@@ -30,14 +30,14 @@ export function LinkCard({
             hash = str.charCodeAt(i) + ((hash << 5) - hash);
         }
 
-        // Vibrant gradients for dark mode
+        // Premium gradients for dark mode
         const gradients = [
-            'bg-gradient-to-br from-blue-600 to-violet-600',
-            'bg-gradient-to-br from-emerald-500 to-teal-500',
-            'bg-gradient-to-br from-orange-500 to-red-500',
-            'bg-gradient-to-br from-pink-500 to-rose-500',
-            'bg-gradient-to-br from-indigo-500 to-cyan-500',
-            'bg-gradient-to-br from-fuchsia-600 to-purple-600',
+            'bg-gradient-to-br from-zinc-800 to-zinc-950',
+            'bg-gradient-to-br from-indigo-900/50 to-zinc-950',
+            'bg-gradient-to-br from-slate-800 to-zinc-900',
+            'bg-gradient-to-br from-blue-900/30 to-zinc-950',
+            'bg-gradient-to-br from-zinc-800/80 to-zinc-950',
+            'bg-gradient-to-br from-indigo-950 to-zinc-950',
         ];
 
         return gradients[Math.abs(hash) % gradients.length];
@@ -68,19 +68,9 @@ export function LinkCard({
 
                 {/* Content Overlay */}
                 <div className="relative z-10 flex flex-col items-center">
-                    {domain && (
-                        <img
-                            src={`https://www.google.com/s2/favicons?domain=${domain}&sz=64`}
-                            alt={domain}
-                            className="w-10 h-10 mb-3 shadow-sm rounded-lg bg-white p-1 ring-1 ring-zinc-200 dark:ring-zinc-800"
-                            onError={(e) => e.target.style.display = 'none'}
-                        />
-                    )}
-
-                    {/* Title Overlay (Serif, Large) */}
-                    <h3 className="font-serif text-lg font-bold text-zinc-900 dark:text-zinc-100 text-center line-clamp-2 leading-tight drop-shadow-sm">
-                        {title}
-                    </h3>
+                    <div className="text-zinc-500 dark:text-zinc-400 font-bold text-[10px] tracking-[0.3em] uppercase text-center max-w-[90%] opacity-70">
+                        {domain}
+                    </div>
                 </div>
 
                 {/* Saved Time Indicator (Hover) */}

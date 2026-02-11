@@ -362,6 +362,16 @@ export function SmartCaptureModal({ isOpen, onClose, initialTab }) {
                                     className="font-mono text-sm border-2 border-zinc-200 dark:border-zinc-800 focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 h-12 bg-zinc-50 dark:bg-zinc-900/50 pr-10 transition-all"
                                 />
                             </div>
+                            <div className="space-y-2.5">
+                                <Label htmlFor="link-why" className="text-sm font-bold text-zinc-900 dark:text-zinc-100">Why you saved this (optional)</Label>
+                                <Textarea
+                                    id="link-why"
+                                    placeholder="Add context for your future self..."
+                                    value={whySaved}
+                                    onChange={(e) => setWhySaved(e.target.value)}
+                                    className="resize-none min-h-[80px] border-2 border-zinc-200 dark:border-zinc-800 focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 bg-zinc-50 dark:bg-zinc-900/50"
+                                />
+                            </div>
                             <div className="space-y-2.5 relative">
                                 <Label htmlFor="link-title" className="text-sm font-bold text-zinc-900 dark:text-zinc-100">Title (optional)</Label>
                                 <Button

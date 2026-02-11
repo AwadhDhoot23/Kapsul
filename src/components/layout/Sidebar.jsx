@@ -24,31 +24,33 @@ import { motion, AnimatePresence } from 'motion/react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useAuthStore } from '@/store/authStore';
 import { useQuery } from '@tanstack/react-query';
-import { fetchUserItemsOnce } from '@/lib/firestore'; // Updated import
+import { getUserItems } from '@/lib/firestore'; // Import normally at top
 
 export function Sidebar({ collapsed, setCollapsed, onNewItem }) {
     const isMobile = useIsMobile();
     const user = useAuthStore((state) => state.user);
 
-    // Fetch items for stats
-    const { data: activeItems = [] } = useQuery({
-        queryKey: ['items', user?.uid, 'active'],
-        queryFn: () => fetchUserItemsOnce(user.uid, { isCompleted: false }),
-        enabled: !!user,
-        staleTime: 30000,
-    });
+    const [counts, setCounts] = useState({ active: 0, completed: 0, total: 0 });
 
-    const { data: completedItems = [] } = useQuery({
-        queryKey: ['items', user?.uid, 'completed'],
-        queryFn: () => fetchUserItemsOnce(user.uid, { isCompleted: true }),
-        enabled: !!user,
-        staleTime: 30000,
-    });
+    useEffect(() => {
+        if (!user?.uid) return;
 
-    // Calculate stats
-    const totalItems = activeItems.length + completedItems.length;
-    const activeCount = activeItems.length;
-    const completedCount = completedItems.length;
+        // Set up real-time listener for all items to count them
+        const unsubscribe = getUserItems(user.uid, {}, (items) => {
+            const active = items.filter(i => !i.isCompleted).length;
+            const completed = items.filter(i => i.isCompleted).length;
+            setCounts({
+                active,
+                completed,
+                total: items.length
+            });
+        });
+
+        return () => unsubscribe();
+    }, [user?.uid]);
+
+    // Calculate stats from real-time state
+    const { active: activeCount, completed: completedCount, total: totalItems } = counts;
     const streak = 7; // TODO: Calculate actual streak from Firestore in future
 
     const NavItem = ({ to, icon: Icon, label, badge }) => (
@@ -201,10 +203,17 @@ export function Sidebar({ collapsed, setCollapsed, onNewItem }) {
                             </div>
                             <div className="flex items-center justify-between text-xs">
                                 <div className="flex items-center gap-2 text-zinc-500 font-bold">
-                                    <div className="w-1.5 h-1.5 rounded-full bg-blue-500" />
+                                    <div className="w-1.5 h-1.5 rounded-full bg-red-500" />
                                     <span>Active</span>
                                 </div>
                                 <span className="font-black text-zinc-900 dark:text-zinc-100">{activeCount}</span>
+                            </div>
+                            <div className="flex items-center justify-between text-xs">
+                                <div className="flex items-center gap-2 text-zinc-500 font-bold">
+                                    <div className="w-1.5 h-1.5 rounded-full bg-blue-500" />
+                                    <span>Completed</span>
+                                </div>
+                                <span className="font-black text-zinc-900 dark:text-zinc-100">{completedCount}</span>
                             </div>
                         </div>
                     </motion.div>

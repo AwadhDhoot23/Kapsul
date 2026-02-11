@@ -487,11 +487,6 @@ export function GlobalSearch({ isOpen, onClose, onOpenCapture, onFocusItem }) {
                                                                 )}
                                                             </div>
                                                         )}
-                                                        <div className="absolute top-2 right-2">
-                                                            <Badge variant="secondary" className="bg-black/90 dark:bg-white/90 shadow-lg border-0 text-[9px] h-5 px-1.5 font-black uppercase tracking-widest text-white dark:text-black">
-                                                                {item.type}
-                                                            </Badge>
-                                                        </div>
                                                     </div>
                                                     <div className="p-4 flex flex-col flex-1 gap-1.5 relative z-10 bg-white/50 dark:bg-zinc-900/50">
                                                         <h4 className="font-bold text-sm leading-tight line-clamp-2 text-zinc-900 dark:text-zinc-50" title={item.title}>
