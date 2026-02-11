@@ -191,12 +191,12 @@ export default function Dashboard() {
 
         return (
             <div className="sticky top-16 z-20 bg-white/50 dark:bg-zinc-950/50 backdrop-blur-xl -mx-6 px-6 py-4 border-b border-zinc-200 dark:border-zinc-800 space-y-4">
-                <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-1.5 p-1 bg-zinc-100/50 dark:bg-zinc-900/50 rounded-xl">
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <div className="flex items-center gap-1.5 p-1 bg-zinc-100/50 dark:bg-zinc-900/50 rounded-xl w-full sm:w-auto">
                         <button
                             onClick={() => { setViewMode('active'); clearSelection(); }}
                             className={cn(
-                                "px-4 py-2 rounded-lg text-sm font-bold transition-all flex items-center gap-2",
+                                "flex-1 sm:flex-none px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-2",
                                 viewMode === 'active' ? "bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 shadow-xl" : "text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-300"
                             )}
                         >
@@ -205,14 +205,13 @@ export default function Dashboard() {
                         <button
                             onClick={() => { setViewMode('completed'); clearSelection(); }}
                             className={cn(
-                                "px-4 py-2 rounded-lg text-sm font-bold transition-all flex items-center gap-2",
+                                "flex-1 sm:flex-none px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-2",
                                 viewMode === 'completed' ? "bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 shadow-xl" : "text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-300"
                             )}
                         >
                             Completed <Badge variant="secondary" className="bg-zinc-200 dark:bg-zinc-800 text-[10px] px-1.5 h-4">{completedItems.length}</Badge>
                         </button>
                     </div>
-
                 </div>
 
                 <div className="flex flex-wrap items-center justify-between gap-3">
@@ -321,47 +320,47 @@ export default function Dashboard() {
                                     transition={{ duration: 0.2, ease: "easeOut" }}
                                     className="mb-8 overflow-hidden sticky top-32 z-30"
                                 >
-                                    <div className="w-full flex items-center justify-between p-2 pl-4 pr-2 rounded-2xl bg-white/80 dark:bg-zinc-900/80 backdrop-blur-xl border border-zinc-200 dark:border-zinc-800 shadow-xl">
-                                        <div className="flex items-center gap-4">
-                                            <div className="flex items-center gap-3">
+                                    <div className="w-full flex items-center justify-between p-2 pl-4 pr-1 sm:pr-2 rounded-2xl bg-white/80 dark:bg-zinc-900/80 backdrop-blur-xl border border-zinc-200 dark:border-zinc-800 shadow-xl overflow-hidden">
+                                        <div className="flex items-center gap-2 sm:gap-4 overflow-hidden">
+                                            <div className="flex items-center gap-2 sm:gap-3">
                                                 <div className="flex items-center justify-center h-8 min-w-[2rem] px-2 rounded-lg bg-zinc-900 dark:bg-zinc-100 text-zinc-100 dark:text-zinc-900 shadow-sm">
                                                     <span className="text-xs font-bold">{selectedItems.length}</span>
                                                 </div>
-                                                <span className="text-sm font-medium text-zinc-600 dark:text-zinc-400">Selected</span>
+                                                <span className="hidden xs:block text-xs sm:text-sm font-medium text-zinc-600 dark:text-zinc-400">Selected</span>
                                             </div>
 
                                             <div className="h-4 w-px bg-zinc-200 dark:bg-zinc-800" />
 
                                             <button
                                                 onClick={() => setSelectedItems(selectedItems.length === filteredAndSortedItems.length ? [] : filteredAndSortedItems.map(i => i.id))}
-                                                className="text-xs font-semibold uppercase tracking-wider text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors"
+                                                className="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors whitespace-nowrap"
                                             >
-                                                {selectedItems.length === filteredAndSortedItems.length ? 'Deselect All' : 'Select All'}
+                                                {selectedItems.length === filteredAndSortedItems.length ? 'None' : 'All'}
                                             </button>
                                         </div>
 
-                                        <div className="flex items-center gap-2">
+                                        <div className="flex items-center gap-1 sm:gap-2">
                                             <Button
                                                 size="sm"
                                                 onClick={handleBulkStatusChange}
-                                                className="h-9 px-4 text-xs font-bold bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 border border-zinc-200 dark:border-zinc-700 hover:border-zinc-300 dark:hover:border-zinc-600 shadow-sm hover:shadow transition-all"
+                                                className="h-9 px-2.5 sm:px-4 text-[10px] sm:text-xs font-bold bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 border border-zinc-200 dark:border-zinc-700 hover:border-zinc-300 dark:hover:border-zinc-600 shadow-sm"
                                             >
-                                                <CheckCircle2 className="w-4 h-4 mr-2" />
-                                                Mark {viewMode === 'completed' ? 'Active' : 'Complete'}
+                                                <CheckCircle2 className="w-4 h-4 sm:mr-2" />
+                                                <span className="hidden sm:inline">Mark {viewMode === 'completed' ? 'Active' : 'Complete'}</span>
                                             </Button>
                                             <Button
                                                 size="sm"
                                                 onClick={handleBulkDelete}
-                                                className="h-9 px-4 text-xs font-bold bg-white dark:bg-zinc-800 text-red-600 dark:text-red-400 border border-zinc-200 dark:border-zinc-700 hover:border-red-200 dark:hover:border-red-900/30 hover:bg-red-50 dark:hover:bg-red-900/10 shadow-sm hover:shadow transition-all"
+                                                className="h-9 px-2.5 sm:px-4 text-[10px] sm:text-xs font-bold bg-white dark:bg-zinc-800 text-red-600 dark:text-red-400 border border-zinc-200 dark:border-zinc-700 hover:border-red-200 dark:hover:border-red-900/30 hover:bg-red-50 dark:hover:bg-red-900/10 shadow-sm"
                                             >
-                                                <Trash2 className="w-4 h-4 mr-2" />
-                                                Delete
+                                                <Trash2 className="w-4 h-4 sm:mr-2" />
+                                                <span className="hidden sm:inline">Delete</span>
                                             </Button>
                                             <Button
                                                 size="sm"
                                                 variant="ghost"
                                                 onClick={clearSelection}
-                                                className="h-9 w-9 p-0 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100"
+                                                className="h-9 w-9 p-0 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-400 whitespace-nowrap"
                                             >
                                                 <X className="w-4 h-4" />
                                             </Button>

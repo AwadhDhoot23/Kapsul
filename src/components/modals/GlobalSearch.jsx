@@ -211,30 +211,36 @@ export function GlobalSearch({ isOpen, onClose, onOpenCapture, onFocusItem }) {
                     </div>
 
                     {/* Search Input Area */}
-                    <div className="flex items-center gap-4 px-6 py-5 border-b-2 border-zinc-200 dark:border-zinc-800 bg-white dark:bg-black relative z-10">
-                        <Search className="w-6 h-6 text-zinc-400 shrink-0" strokeWidth={2.5} />
+                    <div className="flex items-center gap-3 sm:gap-4 px-4 sm:px-6 py-4 sm:py-5 border-b-2 border-zinc-200 dark:border-zinc-800 bg-white dark:bg-black relative z-10">
+                        <button
+                            onClick={onClose}
+                            className="sm:hidden p-2 -ml-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-900 dark:text-zinc-100 transition-colors"
+                        >
+                            <ArrowLeft className="w-5 h-5" />
+                        </button>
+                        <Search className="hidden sm:block w-6 h-6 text-zinc-400 shrink-0" strokeWidth={2.5} />
                         <Input
                             ref={inputRef}
                             placeholder="Search Anything..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                             onKeyDown={handleKeyDown}
-                            className="flex-1 border-0 shadow-none focus-visible:ring-0 text-xl font-medium px-0 bg-transparent placeholder:text-zinc-400 dark:placeholder:text-zinc-600 text-zinc-900 dark:text-zinc-100 h-auto"
+                            className="flex-1 border-0 shadow-none focus-visible:ring-0 text-lg sm:text-xl font-medium px-0 bg-transparent placeholder:text-zinc-400 dark:placeholder:text-zinc-600 text-zinc-900 dark:text-zinc-100 h-auto"
                             autoFocus
                         />
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-1 sm:gap-3">
                             {searchQuery && (
                                 <button
                                     onClick={() => setSearchQuery('')}
-                                    className="p-1 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-400 transition-colors"
+                                    className="p-1.5 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-400 transition-colors"
                                 >
                                     <X className="w-5 h-5" />
                                 </button>
                             )}
-                            <div className="w-px h-6 bg-zinc-200 dark:bg-zinc-800 mx-1" />
+                            <div className="hidden sm:block w-px h-6 bg-zinc-200 dark:bg-zinc-800 mx-1" />
                             <button
                                 onClick={() => setIsShortcutsOpen(true)}
-                                className="p-2 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors"
+                                className="hidden sm:block p-2 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors"
                             >
                                 <Keyboard className="w-5 h-5" />
                             </button>

@@ -37,10 +37,16 @@ export function VideoCard({
     onMarkComplete,
     onEditTags
 }) {
-    // Format duration (seconds to MM:SS)
+    // Format duration (seconds to HH:MM:SS or MM:SS)
     const formatDuration = (seconds) => {
-        const mins = Math.floor(seconds / 60);
+        if (!seconds) return '0:00';
+        const hrs = Math.floor(seconds / 3600);
+        const mins = Math.floor((seconds % 3600) / 60);
         const secs = seconds % 60;
+
+        if (hrs > 0) {
+            return `${hrs}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        }
         return `${mins}:${secs.toString().padStart(2, '0')}`;
     };
 

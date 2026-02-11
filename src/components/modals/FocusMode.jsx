@@ -71,16 +71,17 @@ function MediaFocusView({ item, onClose, onUpdate, onDelete }) {
     };
 
     return (
-        <div className="flex flex-col h-full max-h-[85vh] bg-white dark:bg-zinc-950">
+        <div className="flex flex-col h-full bg-white dark:bg-zinc-950">
             {/* Close Button */}
             <button
                 onClick={onClose}
-                className="absolute top-4 right-4 z-50 p-2 rounded-full bg-white/90 dark:bg-zinc-900/90 hover:bg-white dark:hover:bg-zinc-900 shadow-lg border border-zinc-200 dark:border-zinc-800 transition-colors"
+                className="absolute top-3 right-3 sm:top-4 sm:right-4 z-50 p-2 rounded-full bg-white/90 dark:bg-zinc-900/90 hover:bg-white dark:hover:bg-zinc-900 shadow-lg border border-zinc-200 dark:border-zinc-800 transition-colors"
+                aria-label="Close"
             >
                 <X className="w-5 h-5 text-zinc-900 dark:text-zinc-100" />
             </button>
 
-            <div className="flex-1 overflow-y-auto p-8">
+            <div className="flex-1 overflow-y-auto p-4 sm:p-8">
                 {/* Thumbnail */}
                 <div className="relative aspect-video max-w-4xl mx-auto mb-8 rounded-xl overflow-hidden border-2 border-zinc-200 dark:border-zinc-800 shadow-xl bg-zinc-900">
                     {item.thumbnail ? (
@@ -127,23 +128,23 @@ function MediaFocusView({ item, onClose, onUpdate, onDelete }) {
 
                 </div>
 
-                <div className="max-w-4xl mx-auto space-y-6">
+                <div className="max-w-4xl mx-auto space-y-4 sm:space-y-6">
                     {/* Main Title Below Media */}
-                    <h1 className="text-4xl font-serif font-bold text-zinc-900 dark:text-zinc-100 leading-tight">
+                    <h1 className="text-2xl sm:text-4xl font-serif font-bold text-zinc-900 dark:text-zinc-100 leading-tight">
                         {item.title}
                     </h1>
 
                     {/* Metadata */}
-                    <div className="space-y-3">
+                    <div className="space-y-2 sm:space-y-3">
                         {/* Channel Info */}
                         {(item.channel || item.channelTitle) && (
-                            <div className="flex items-center gap-3">
+                            <div className="flex items-center gap-2 sm:gap-3">
                                 <div>
-                                    <p className="text-base font-semibold text-zinc-900 dark:text-zinc-100">
+                                    <p className="text-sm sm:text-base font-semibold text-zinc-900 dark:text-zinc-100">
                                         {item.channel || item.channelTitle}
                                     </p>
                                     {(item.type === 'video' || item.type === 'playlist') && (
-                                        <p className="text-xs text-zinc-500">
+                                        <p className="text-[10px] sm:text-xs text-zinc-500">
                                             {item.subscriberCount || 'YouTube Channel'}
                                         </p>
                                     )}
@@ -152,10 +153,10 @@ function MediaFocusView({ item, onClose, onUpdate, onDelete }) {
                         )}
 
                         {/* Additional Metadata */}
-                        <div className="flex flex-wrap items-center gap-4 text-sm text-zinc-600 dark:text-zinc-400">
+                        <div className="flex flex-wrap items-center gap-3 sm:gap-4 text-[11px] sm:text-sm text-zinc-600 dark:text-zinc-400">
                             {item.domain && (
                                 <div className="flex items-center gap-2">
-                                    <span>{item.domain}</span>
+                                    <span className="font-bold text-zinc-900 dark:text-zinc-100">{item.domain}</span>
                                 </div>
                             )}
                             {item.duration && (
@@ -348,44 +349,44 @@ function NoteFocusView({ item, onClose }) {
     };
 
     return (
-        <div className="flex flex-col h-full max-h-[90vh] bg-white dark:bg-zinc-950">
+        <div className="flex flex-col h-full bg-white dark:bg-zinc-950">
             {/* Header Bar */}
-            <div className="border-b border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 px-6 py-4 flex items-center justify-between">
-                <div className="flex-1 flex items-center gap-4">
+            <div className="border-b border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between gap-2">
+                <div className="flex-1 flex items-center gap-2 sm:gap-4 overflow-hidden">
                     <Input
                         value={title}
                         onChange={(e) => setTitle(e.target.value)}
                         placeholder="Untitled Note"
-                        className="text-xl font-serif font-semibold border-0 focus-visible:ring-0 px-0 bg-transparent"
+                        className="text-lg sm:text-xl font-serif font-semibold border-0 focus-visible:ring-0 px-0 bg-transparent truncate"
                     />
-                    {isSaving ? (
-                        <span className="text-xs text-zinc-500">Saving...</span>
-                    ) : (
-                        <span className="text-xs text-zinc-400">{formatRelativeTime(item.createdAt)}</span>
+                    {isSaving && (
+                        <span className="text-[10px] sm:text-xs text-zinc-500 shrink-0">Saving...</span>
                     )}
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1 sm:gap-2">
                     <Button
                         onClick={handleMarkComplete}
                         variant="ghost"
                         size="sm"
+                        className="h-8 sm:h-9 px-2 sm:px-3"
                     >
-                        <CheckCircle2 className={cn("w-4 h-4 mr-2", item.isCompleted && "text-green-500")} />
-                        {item.isCompleted ? 'Active' : 'Complete'}
+                        <CheckCircle2 className={cn("w-4 h-4 sm:mr-2", item.isCompleted && "text-green-500")} />
+                        <span className="hidden sm:inline">{item.isCompleted ? 'Active' : 'Complete'}</span>
                     </Button>
                     <Button
                         onClick={handleDelete}
                         variant="ghost"
                         size="sm"
-                        className="text-red-600 hover:text-red-700"
+                        className="h-8 sm:h-9 px-2 sm:px-3 text-red-600 hover:text-red-700"
                     >
-                        <Trash2 className="w-4 h-4 mr-2" />
-                        Delete
+                        <Trash2 className="w-4 h-4 sm:mr-2" />
+                        <span className="hidden sm:inline">Delete</span>
                     </Button>
                     <Button
                         onClick={handleClose}
                         variant="ghost"
                         size="icon"
+                        className="h-8 w-8 sm:h-9 sm:w-9"
                     >
                         <X className="w-5 h-5" />
                     </Button>

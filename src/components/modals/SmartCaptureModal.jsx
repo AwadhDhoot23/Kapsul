@@ -264,17 +264,17 @@ export function SmartCaptureModal({ isOpen, onClose, initialTab }) {
         <Dialog open={isOpen} onOpenChange={onClose}>
             <DialogContent className="sm:max-w-[680px] max-h-[90vh] overflow-hidden p-0 border-2 bg-white dark:bg-black shadow-[0_20px_80px_rgba(0,0,0,0.3)] dark:shadow-[0_20px_80px_rgba(255,255,255,0.15)] border-zinc-900 dark:border-zinc-100">
                 {/* Premium Header - Unchanged */}
-                <DialogHeader className="px-8 pt-8 pb-6 border-b-2 border-zinc-900 dark:border-zinc-100">
-                    <DialogTitle className="text-4xl font-serif font-black text-zinc-950 dark:text-zinc-50 tracking-tighter leading-none">
+                <DialogHeader className="px-5 sm:px-8 pt-6 sm:pt-8 pb-4 sm:pb-6 border-b-2 border-zinc-900 dark:border-zinc-100">
+                    <DialogTitle className="text-2xl sm:text-4xl font-serif font-black text-zinc-950 dark:text-zinc-50 tracking-tighter leading-none">
                         Smart Capture
                     </DialogTitle>
-                    <DialogDescription className="text-sm text-zinc-600 dark:text-zinc-400 mt-3 font-medium">
-                        Save videos, links, notes, or playlists to your knowledge base
+                    <DialogDescription className="text-xs sm:text-sm text-zinc-600 dark:text-zinc-400 mt-2 sm:mt-3 font-medium">
+                        Save videos, links, notes, or playlists to your library
                     </DialogDescription>
                 </DialogHeader>
 
                 {/* Main Content */}
-                <div className="px-8 py-8 space-y-8 max-h-[calc(90vh-240px)] overflow-y-auto">
+                <div className="px-5 sm:px-8 py-5 sm:py-8 space-y-6 sm:space-y-8 max-h-[calc(90vh-180px)] sm:max-h-[calc(90vh-240px)] overflow-y-auto custom-scrollbar">
                     {/* Tabs with Clean Minimalist Design (Apple-like) */}
                     <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
                         <TabsList className="flex w-full bg-transparent p-0 border-b border-zinc-200 dark:border-zinc-800">
