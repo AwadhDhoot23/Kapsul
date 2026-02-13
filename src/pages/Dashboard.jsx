@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { Header } from '@/components/layout/Header';
 import { GridPattern } from '@/components/ui/grid-pattern';
@@ -9,7 +9,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
     Plus, Video, Link as LinkIcon, FileText, ListVideo,
     ChevronDown, Filter, CheckCircle2, Trash2, X,
-    Search
+    Search, Info
 } from 'lucide-react';
 import { VideoCard } from '@/components/cards/VideoCard';
 import { LinkCard } from '@/components/cards/LinkCard';
@@ -20,6 +20,7 @@ import { GlobalSearch } from '@/components/modals/GlobalSearch';
 import { FocusMode } from '@/components/modals/FocusMode';
 import { useAuthStore } from '@/store/authStore';
 import { getUserItems, updateItem, deleteItem } from '@/lib/firestore';
+import { MOCK_ITEMS } from '@/lib/mockData';
 import { toast } from 'sonner';
 import Masonry from 'react-masonry-css';
 import { cn } from '@/lib/utils';
@@ -33,6 +34,7 @@ import {
 export default function Dashboard() {
     const user = useAuthStore((state) => state.user);
     const [searchParams, setSearchParams] = useSearchParams();
+    const navigate = useNavigate();
 
     // UI State
     const [sidebarCollapsed, setSidebarCollapsed] = useState(true);
@@ -53,8 +55,16 @@ export default function Dashboard() {
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-        if (!user?.uid) return;
         setIsLoading(true);
+
+        if (!user?.uid) {
+            // GUEST MODE: Load mock data
+            setItems(MOCK_ITEMS);
+            setIsLoading(false);
+            return;
+        }
+
+        // USER MODE: Fetch from Firestore
         const unsubscribe = getUserItems(user.uid, {}, (fetchedItems) => {
             setItems(fetchedItems);
             setIsLoading(false);
@@ -113,9 +123,61 @@ export default function Dashboard() {
 
     // Handlers
 
+    // Helper for handling Guest vs User actions
+    const handleAction = async (actionFn, successMessage, errorMessage) => {
+        if (!user) {
+            // Guest Mode: Update local state
+            // This expects actionFn to return the new items list or we handle it manually
+            // Since the handlers below are specific, let's just make them handle both.
+            return;
+        }
+        try {
+            await actionFn();
+            if (successMessage) toast.success(successMessage);
+        } catch (error) {
+            console.error(error);
+            if (errorMessage) toast.error(errorMessage);
+        }
+    };
+
     const toggleSelection = (id) => {
         if (!bulkSelectMode) setBulkSelectMode(true);
         setSelectedItems(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]);
+    };
+
+    // Update Item Handler (Pin, Complete, etc.)
+    const handleUpdateItem = async (id, updates) => {
+        if (!user) {
+            // Guest Mode: Local Update
+            setItems(prev => prev.map(item => item.id === id ? { ...item, ...updates } : item));
+            toast.success('Updated locally (Guest Mode)');
+            return;
+        }
+        // User Mode: Firestore Update
+        try {
+            await updateItem(id, updates);
+        } catch (error) {
+            toast.error('Failed to update item');
+        }
+    };
+
+    // Delete Item Handler
+    const handleDeleteItem = async (id) => {
+        if (!confirm('Delete this item?')) return;
+
+        if (!user) {
+            // Guest Mode: Local Delete
+            setItems(prev => prev.filter(item => item.id !== id));
+            toast.success('Deleted locally (Guest Mode)');
+            return;
+        }
+        // User Mode: Firestore Delete
+        try {
+            await deleteItem(id);
+            toast.success('Item deleted');
+        } catch (error) {
+            toast.error('Failed to delete item');
+        }
     };
 
     const clearSelection = () => {
@@ -125,6 +187,15 @@ export default function Dashboard() {
 
     const handleBulkDelete = async () => {
         if (!confirm(`Delete ${selectedItems.length} items?`)) return;
+
+        if (!user) {
+            // Guest Mode
+            setItems(prev => prev.filter(item => !selectedItems.includes(item.id)));
+            toast.success(`Deleted ${selectedItems.length} items (Guest Mode)`);
+            clearSelection();
+            return;
+        }
+
         try {
             await Promise.all(selectedItems.map(id => deleteItem(id)));
             toast.success(`Deleted ${selectedItems.length} items`);
@@ -134,6 +205,17 @@ export default function Dashboard() {
 
     const handleBulkStatusChange = async () => {
         const newStatus = viewMode !== 'completed';
+
+        if (!user) {
+            // Guest Mode
+            setItems(prev => prev.map(item =>
+                selectedItems.includes(item.id) ? { ...item, isCompleted: newStatus } : item
+            ));
+            toast.success(`Updated ${selectedItems.length} items (Guest Mode)`);
+            clearSelection();
+            return;
+        }
+
         try {
             await Promise.all(selectedItems.map(id => updateItem(id, { isCompleted: newStatus })));
             toast.success(`Updated ${selectedItems.length} items`);
@@ -262,9 +344,9 @@ export default function Dashboard() {
                 const { key, ...restItem } = item;
                 const cardProps = {
                     ...restItem,
-                    onPin: (id) => updateItem(id, { isPinned: !item.isPinned }),
-                    onDelete: (id) => { if (confirm('Delete?')) deleteItem(id); },
-                    onMarkComplete: (id) => updateItem(id, { isCompleted: !item.isCompleted }),
+                    onPin: (id) => handleUpdateItem(id, { isPinned: !item.isPinned }),
+                    onDelete: handleDeleteItem,
+                    onMarkComplete: (id) => handleUpdateItem(id, { isCompleted: !item.isCompleted }),
                     onClick: () => bulkSelectMode ? toggleSelection(item.id) : setFocusItem(item),
                     isSelected: selectedItems.includes(item.id),
                     onSelect: () => toggleSelection(item.id),
@@ -298,6 +380,49 @@ export default function Dashboard() {
                 <Header viewMode={viewMode} setViewMode={setViewMode} onMenuClick={() => setSidebarCollapsed(false)} onSearchClick={() => setIsGlobalSearchOpen(true)} />
 
                 <div className="flex-1 p-6 sm:p-8 max-w-[1600px] mx-auto w-full relative z-10">
+                    {!user && (
+                        <motion.div
+                            initial={{ opacity: 0, y: -20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className="mb-10 relative overflow-hidden rounded-3xl p-[2px] group"
+                        >
+                            {/* Animated Glowing Border - High Contrast Sweep */}
+                            <motion.div
+                                className="absolute left-1/2 top-1/2 w-[4000px] h-[4000px] bg-[conic-gradient(from_0deg,transparent_0_300deg,#d4d4d8_330deg,#ffffff_345deg,#d4d4d8_360deg)] dark:bg-[conic-gradient(from_0deg,transparent_0_300deg,#3f3f46_330deg,#ffffff_345deg,#3f3f46_360deg)] opacity-40 dark:opacity-50"
+                                initial={{ x: "-50%", y: "-50%" }}
+                                animate={{ rotate: 360, x: "-50%", y: "-50%" }}
+                                transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
+                            />
+
+                            <div className="relative bg-zinc-50/90 dark:bg-zinc-950/90 backdrop-blur-2xl rounded-[22px] px-6 py-6 flex flex-col sm:flex-row items-center justify-between gap-6 overflow-hidden border border-zinc-200/50 dark:border-zinc-800/50 shadow-sm">
+
+                                <div className="flex items-center gap-5 text-center sm:text-left w-full sm:w-auto flex-col sm:flex-row">
+                                    <div className="p-3.5 bg-white dark:bg-zinc-900 rounded-2xl shadow-[0_2px_8px_-2px_rgba(0,0,0,0.1)] ring-1 ring-zinc-200 dark:ring-zinc-800 text-zinc-900 dark:text-zinc-100 relative">
+                                        <Info className="w-6 h-6 relative z-10" strokeWidth={2} />
+                                    </div>
+                                    <div className="space-y-1.5">
+                                        <div className="flex items-center justify-center sm:justify-start gap-2.5">
+                                            <h3 className="text-base font-bold text-zinc-900 dark:text-zinc-50 tracking-tight">Guest Mode Active</h3>
+                                            <span className="px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-widest bg-zinc-200/50 dark:bg-zinc-800/50 text-zinc-600 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-700/50">
+                                                Trial
+                                            </span>
+                                        </div>
+                                        <p className="text-sm text-zinc-500 dark:text-zinc-400 font-medium leading-relaxed max-w-md">
+                                            You're using a temporary session. Sign in now to save your videos, notes, and playlists permanently.
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <Button
+                                    onClick={() => navigate('/auth')}
+                                    className="shrink-0 rounded-xl font-bold uppercase tracking-widest text-[11px] h-12 px-8 bg-zinc-900 dark:bg-zinc-50 text-white dark:text-zinc-950 hover:scale-[1.02] active:scale-[0.98] transition-all shadow-xl hover:shadow-2xl shadow-zinc-900/10 dark:shadow-zinc-100/10 w-full sm:w-auto"
+                                >
+                                    Sign In to Save
+                                </Button>
+                            </div>
+                        </motion.div>
+                    )}
+
                     <HeroSection />
 
                     <div className="mb-6">

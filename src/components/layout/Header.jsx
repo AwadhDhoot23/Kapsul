@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Bell, LayoutList, LayoutGrid, Settings, LogOut, Menu } from 'lucide-react';
+import { Search, Bell, LayoutList, LayoutGrid, Settings, LogOut, Menu, Sun, Moon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -14,6 +14,7 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { useAuthStore } from '@/store/authStore';
+import { useTheme } from '../providers/ThemeProvider';
 
 export function Header({ viewMode, setViewMode, onMenuClick, onSearchClick }) {
     const { user, signOut } = useAuthStore();
@@ -54,46 +55,78 @@ export function Header({ viewMode, setViewMode, onMenuClick, onSearchClick }) {
             {/* Right Side: User Menu */}
             <div className="flex items-center gap-2 sm:gap-4">
 
+                {/* Guest Theme Toggle */}
+                {!user && (
+                    <ThemeToggle />
+                )}
+
+                {/* User Info or Sign In */}
 
 
 
 
-                {/* User Avatar Dropdown */}
-                <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="relative h-10 w-10 rounded-full">
-                            <Avatar className="h-9 w-9 border border-zinc-300 dark:border-zinc-700">
-                                <AvatarImage src={user?.photoURL} alt={user?.displayName} />
-                                <AvatarFallback className="bg-zinc-100 dark:bg-zinc-800 text-sm font-medium">
-                                    {user?.displayName?.substring(0, 2).toUpperCase() || 'U'}
-                                </AvatarFallback>
-                            </Avatar>
-                        </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent className="w-56" align="end" forceMount>
-                        <DropdownMenuLabel className="font-normal">
-                            <div className="flex flex-col space-y-1">
-                                <p className="text-sm font-medium leading-none text-zinc-900 dark:text-zinc-100">
-                                    {user?.displayName || 'User'}
-                                </p>
-                                <p className="text-xs leading-none text-zinc-500">
-                                    {user?.email}
-                                </p>
-                            </div>
-                        </DropdownMenuLabel>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem onClick={() => navigate('/settings')} className="cursor-pointer">
-                            <Settings className="mr-2 h-4 w-4" />
-                            <span>Settings</span>
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem onClick={handleSignOut} className="cursor-pointer text-red-600 focus:text-red-600 dark:text-red-500 dark:focus:text-red-500">
-                            <LogOut className="mr-2 h-4 w-4" />
-                            <span>Sign out</span>
-                        </DropdownMenuItem>
-                    </DropdownMenuContent>
-                </DropdownMenu>
+
+                {/* User Info or Sign In */}
+                {!user ? (
+                    <Button
+                        onClick={() => navigate('/auth')}
+                        className="bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-zinc-200 font-bold rounded-lg px-6"
+                    >
+                        Sign In
+                    </Button>
+                ) : (
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" className="relative h-10 w-10 rounded-full">
+                                <Avatar className="h-9 w-9 border border-zinc-300 dark:border-zinc-700">
+                                    <AvatarImage src={user?.photoURL} alt={user?.displayName} />
+                                    <AvatarFallback className="bg-zinc-100 dark:bg-zinc-800 text-sm font-medium">
+                                        {user?.displayName?.substring(0, 2).toUpperCase() || 'U'}
+                                    </AvatarFallback>
+                                </Avatar>
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent className="w-56" align="end" forceMount>
+                            <DropdownMenuLabel className="font-normal">
+                                <div className="flex flex-col space-y-1">
+                                    <p className="text-sm font-medium leading-none text-zinc-900 dark:text-zinc-100">
+                                        {user?.displayName || 'User'}
+                                    </p>
+                                    <p className="text-xs leading-none text-zinc-500">
+                                        {user?.email}
+                                    </p>
+                                </div>
+                            </DropdownMenuLabel>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem onClick={() => navigate('/settings')} className="cursor-pointer">
+                                <Settings className="mr-2 h-4 w-4" />
+                                <span>Settings</span>
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem onClick={handleSignOut} className="cursor-pointer text-red-600 focus:text-red-600 dark:text-red-500 dark:focus:text-red-500">
+                                <LogOut className="mr-2 h-4 w-4" />
+                                <span>Sign out</span>
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                )}
             </div>
         </header >
     );
+
+
+    function ThemeToggle() {
+        const { theme, setTheme } = useTheme();
+
+        return (
+            <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+                className="text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100"
+            >
+                {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+            </Button>
+        );
+    }
 }

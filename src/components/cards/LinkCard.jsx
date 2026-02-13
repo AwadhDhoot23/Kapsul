@@ -1,6 +1,7 @@
 import React from 'react';
 import { BaseCard } from './BaseCard';
 import { Badge } from '@/components/ui/badge';
+import { Video } from 'lucide-react';
 import { cn, formatRelativeTime } from '@/lib/utils';
 
 export function LinkCard({
@@ -67,10 +68,13 @@ export function LinkCard({
                 }}></div>
 
                 {/* Content Overlay */}
-                <div className="relative z-10 flex flex-col items-center">
-                    <div className="text-zinc-500 dark:text-zinc-400 font-bold text-[10px] tracking-[0.3em] uppercase text-center max-w-[90%] opacity-70">
-                        {domain}
+                <div className="relative z-10 flex flex-col items-center px-4 w-full">
+                    <div className="text-zinc-500 dark:text-zinc-400 font-bold text-[10px] tracking-[0.3em] uppercase text-center max-w-[90%] opacity-70 mb-2">
+                        {domain || 'LINK'}
                     </div>
+                    <h3 className="text-base font-serif font-bold text-zinc-900 dark:text-zinc-100 text-center line-clamp-3 leading-tight">
+                        {title}
+                    </h3>
                 </div>
 
                 {/* Saved Time Indicator (Hover) */}

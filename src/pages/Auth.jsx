@@ -266,6 +266,16 @@ export default function Auth() {
                                     {mode === 'signup' ? 'Sign in' : 'Sign up'}
                                 </button>
                             </div>
+
+                            <div className="mt-6 text-center">
+                                <button
+                                    type="button"
+                                    onClick={() => navigate('/')}
+                                    className="text-xs text-zinc-500 hover:text-zinc-300 transition-colors flex items-center justify-center gap-1 mx-auto"
+                                >
+                                    <span className="flex items-center gap-1">Continue as Guest <ArrowRight className="w-3 h-3" /></span>
+                                </button>
+                            </div>
                         </CardContent>
                     </Card>
                 </motion.div>

@@ -1,10 +1,12 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Search, Clock, Link2, FileText, Video, ListVideo, Plus, Settings, X, ArrowRight, CornerDownLeft, Moon, Sun, Home, Trash2, Command, ArrowLeft, ArrowDown, ArrowUp, Zap, Keyboard } from 'lucide-react';
 import { useAuthStore } from '@/store/authStore';
 import { getUserItems } from '@/lib/firestore';
+import { MOCK_ITEMS } from '@/lib/mockData';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
@@ -25,7 +27,13 @@ export function GlobalSearch({ isOpen, onClose, onOpenCapture, onFocusItem }) {
 
     // Fetch items when open
     useEffect(() => {
-        if (!user?.uid || !isOpen) return;
+        if (!isOpen) return;
+
+        if (!user?.uid) {
+            setItems(MOCK_ITEMS);
+            return;
+        }
+
         const unsubscribe = getUserItems(user.uid, {}, (fetchedItems) => {
             setItems(fetchedItems);
         });
@@ -101,7 +109,14 @@ export function GlobalSearch({ isOpen, onClose, onOpenCapture, onFocusItem }) {
             // Execute Command
             if (item.id === 'cmd-theme') setTheme(theme === 'dark' ? 'light' : 'dark');
             if (item.id === 'cmd-capture') { onClose(); onOpenCapture(); }
-            if (item.id === 'cmd-settings') { onClose(); navigate('/settings'); }
+            if (item.id === 'cmd-settings') {
+                onClose();
+                if (user) {
+                    navigate('/settings');
+                } else {
+                    toast.error("Sign in required to access Settings");
+                }
+            }
             if (item.id === 'cmd-library') { onClose(); navigate('/'); }
 
             if (item.id !== 'cmd-capture' && item.id !== 'cmd-settings' && item.id !== 'cmd-library') {
@@ -333,7 +348,14 @@ export function GlobalSearch({ isOpen, onClose, onOpenCapture, onFocusItem }) {
                                                 <span className="font-bold text-xs text-zinc-900 dark:text-zinc-100 tracking-tight">Theme</span>
                                             </button>
                                             <button
-                                                onClick={() => { onClose(); navigate('/settings'); }}
+                                                onClick={() => {
+                                                    onClose();
+                                                    if (user) {
+                                                        navigate('/settings');
+                                                    } else {
+                                                        toast.error("Sign in required to access Settings");
+                                                    }
+                                                }}
                                                 className="group flex flex-col items-center justify-center gap-3 p-6 bg-white dark:bg-zinc-900/50 rounded-2xl hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-all border border-zinc-200 dark:border-zinc-800 hover:border-zinc-900 dark:hover:border-zinc-100 hover:shadow-xl backdrop-blur-sm shadow-sm relative overflow-hidden"
                                             >
                                                 <div className="p-3.5 rounded-full bg-zinc-100 dark:bg-zinc-800 group-hover:bg-zinc-900 group-hover:text-white dark:group-hover:bg-white dark:group-hover:text-black transition-colors">

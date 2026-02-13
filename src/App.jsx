@@ -8,6 +8,7 @@ import Settings from './pages/Settings';
 import Library from './pages/Library';
 import Auth from './pages/Auth';
 import { useAuthStore } from './store/authStore';
+import { Loader } from './components/ui/KapsulLoader';
 
 // Create a client
 const queryClient = new QueryClient({
@@ -28,14 +29,7 @@ function App() {
   }, [initialize]);
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="text-center space-y-4">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-          <p className="text-muted-foreground">Loading Kapsul...</p>
-        </div>
-      </div>
-    );
+    return <Loader />;
   }
 
   return (
@@ -45,7 +39,7 @@ function App() {
           <Toaster position="top-center" richColors />
           <Routes>
             <Route path="/auth" element={!user ? <Auth /> : <Navigate to="/" />} />
-            <Route path="/" element={user ? <Dashboard /> : <Navigate to="/auth" />} />
+            <Route path="/" element={<Dashboard />} />
             <Route path="/settings" element={user ? <Settings /> : <Navigate to="/auth" />} />
             <Route path="*" element={<Navigate to="/" />} />
           </Routes>

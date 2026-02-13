@@ -1,6 +1,7 @@
 import React from 'react';
 import { BaseCard } from './BaseCard';
 import { Badge } from '@/components/ui/badge';
+import { Video } from 'lucide-react';
 import { cn, formatRelativeTime } from '@/lib/utils';
 
 // Helper to extract YouTube ID
@@ -78,8 +79,12 @@ export function VideoCard({
                         alt={title}
                         className="w-full h-full object-cover"
                         onError={(e) => {
-                            // Fallback if maxres/hq fails, though hq usually exists
+                            // Robust fallback sequence: hq -> mq -> default (0)
                             if (e.target.src.includes('hqdefault')) {
+                                e.target.src = e.target.src.replace('hqdefault', 'mqdefault');
+                            } else if (e.target.src.includes('mqdefault')) {
+                                e.target.src = e.target.src.replace('mqdefault', '0');
+                            } else {
                                 e.target.style.display = 'none';
                             }
                         }}

@@ -15,16 +15,25 @@ import {
     Zap,
     CheckCircle2,
     Circle,
-    Command
+    Command,
+    Lock
 } from 'lucide-react';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Sheet, SheetContent, SheetTitle, SheetDescription } from '@/components/ui/sheet';
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { motion, AnimatePresence } from 'framer-motion';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useAuthStore } from '@/store/authStore';
 import { useQuery } from '@tanstack/react-query';
 import { getUserItems } from '@/lib/firestore'; // Import normally at top
+import { MOCK_ITEMS } from '@/lib/mockData';
 
 export function Sidebar({ collapsed, setCollapsed, onNewItem }) {
     const isMobile = useIsMobile();
@@ -33,7 +42,17 @@ export function Sidebar({ collapsed, setCollapsed, onNewItem }) {
     const [counts, setCounts] = useState({ active: 0, completed: 0, total: 0 });
 
     useEffect(() => {
-        if (!user?.uid) return;
+        if (!user?.uid) {
+            // GUEST MODE: Count mock items
+            const active = MOCK_ITEMS.filter(i => !i.isCompleted).length;
+            const completed = MOCK_ITEMS.filter(i => i.isCompleted).length;
+            setCounts({
+                active,
+                completed,
+                total: MOCK_ITEMS.length
+            });
+            return;
+        }
 
         // Set up real-time listener for all items to count them
         const unsubscribe = getUserItems(user.uid, {}, (items) => {
@@ -53,56 +72,85 @@ export function Sidebar({ collapsed, setCollapsed, onNewItem }) {
     const { active: activeCount, completed: completedCount, total: totalItems } = counts;
     const streak = 7; // TODO: Calculate actual streak from Firestore in future
 
-    const NavItem = ({ to, icon: Icon, label, badge }) => (
-        <NavLink
-            to={to}
-            className={({ isActive }) =>
-                cn(
-                    "nav-item flex items-center justify-center px-3 py-2.5 rounded-xl transition-all duration-300 group relative overflow-hidden",
-                    isActive
-                        ? "active bg-zinc-100 dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 font-bold shadow-sm"
-                        : "text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-50 dark:hover:bg-zinc-900/50"
-                )
+    const NavItem = ({ to, icon: Icon, label, badge, locked }) => {
+        const handleClick = (e) => {
+            if (locked) {
+                e.preventDefault();
+                toast.error("Sign in to access Settings");
             }
-            title={collapsed ? label : undefined}
-        >
-            {({ isActive }) => (
-                <motion.div
-                    initial={false}
-                    animate={{ x: 0 }}
-                    whileHover={!collapsed ? { x: 4 } : {}}
-                    className={cn(
-                        "flex items-center w-full",
-                        collapsed ? "justify-center" : "gap-3"
-                    )}
-                >
-                    <div className={cn(
-                        "flex items-center justify-center p-1.5 rounded-lg transition-all duration-300",
-                        isActive ? "bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900" : "bg-transparent text-zinc-400 group-hover:text-zinc-600 dark:group-hover:text-zinc-300"
-                    )}>
-                        <Icon className="w-4 h-4 shrink-0" strokeWidth={isActive ? 2.5 : 2} />
-                    </div>
+        };
 
-                    {!collapsed && (
-                        <>
-                            <span className="whitespace-nowrap flex-1 text-[13px] tracking-tight">
-                                {label}
-                            </span>
-                            {badge > 0 && (
-                                <motion.span
-                                    initial={{ scale: 0 }}
-                                    animate={{ scale: 1 }}
-                                    className="text-[10px] font-black text-zinc-400 border border-zinc-200 dark:border-zinc-800 px-2 py-0.5 rounded-full shrink-0 bg-white dark:bg-zinc-900"
-                                >
-                                    {badge}
-                                </motion.span>
-                            )}
-                        </>
-                    )}
-                </motion.div>
-            )}
-        </NavLink>
-    );
+        const content = (
+            <NavLink
+                to={locked ? '#' : to}
+                onClick={handleClick}
+                className={({ isActive }) =>
+                    cn(
+                        "nav-item flex items-center justify-center px-3 py-2.5 rounded-xl transition-all duration-300 group relative overflow-hidden",
+                        isActive && !locked
+                            ? "active bg-zinc-100 dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 font-bold shadow-sm"
+                            : "text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-50 dark:hover:bg-zinc-900/50",
+                        locked && "opacity-50 cursor-not-allowed hover:bg-transparent hover:text-zinc-400"
+                    )
+                }
+                title={collapsed ? label : undefined}
+            >
+                {({ isActive }) => (
+                    <motion.div
+                        initial={false}
+                        animate={{ x: 0 }}
+                        whileHover={!collapsed && !locked ? { x: 4 } : {}}
+                        className={cn(
+                            "flex items-center w-full",
+                            collapsed ? "justify-center" : "gap-3"
+                        )}
+                    >
+                        <div className={cn(
+                            "flex items-center justify-center p-1.5 rounded-lg transition-all duration-300",
+                            isActive && !locked ? "bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900" : "bg-transparent text-zinc-400 group-hover:text-zinc-600 dark:group-hover:text-zinc-300"
+                        )}>
+                            <Icon className="w-4 h-4 shrink-0" strokeWidth={isActive && !locked ? 2.5 : 2} />
+                        </div>
+
+                        {!collapsed && (
+                            <>
+                                <span className="whitespace-nowrap flex-1 text-[13px] tracking-tight">
+                                    {label}
+                                </span>
+                                {locked && <Lock className="w-3 h-3 text-zinc-500" />}
+                                {badge > 0 && !locked && (
+                                    <motion.span
+                                        initial={{ scale: 0 }}
+                                        animate={{ scale: 1 }}
+                                        className="text-[10px] font-black text-zinc-400 border border-zinc-200 dark:border-zinc-800 px-2 py-0.5 rounded-full shrink-0 bg-white dark:bg-zinc-900"
+                                    >
+                                        {badge}
+                                    </motion.span>
+                                )}
+                            </>
+                        )}
+                    </motion.div>
+                )}
+            </NavLink>
+        );
+
+        if (locked) {
+            return (
+                <TooltipProvider>
+                    <Tooltip delayDuration={0}>
+                        <TooltipTrigger asChild>
+                            <div className="w-full">{content}</div>
+                        </TooltipTrigger>
+                        <TooltipContent side="right" className="bg-zinc-900 text-white border-zinc-800">
+                            <p>Sign in to access Settings</p>
+                        </TooltipContent>
+                    </Tooltip>
+                </TooltipProvider>
+            );
+        }
+
+        return content;
+    };
 
     // Sidebar content (shared between desktop and mobile)
     const SidebarContent = ({ showMobileClose = false }) => (
@@ -181,7 +229,7 @@ export function Sidebar({ collapsed, setCollapsed, onNewItem }) {
             {/* Navigation */}
             <nav className="flex-1 px-3 space-y-1.5 py-4 overflow-y-auto custom-scrollbar">
                 <NavItem to="/" icon={LayoutGrid} label="Everything" badge={activeCount} />
-                <NavItem to="/settings" icon={Settings} label="Settings" />
+                <NavItem to="/settings" icon={Settings} label="Settings" locked={!user} />
 
                 {/* Mobile Status Widget (Visible only on mobile, below settings) */}
                 {(!collapsed || showMobileClose) && (
