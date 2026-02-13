@@ -9,6 +9,7 @@ import Library from './pages/Library';
 import Auth from './pages/Auth';
 import { useAuthStore } from './store/authStore';
 import { Loader } from './components/ui/KapsulLoader';
+import { Analytics } from '@vercel/analytics/react';
 
 // Create a client
 const queryClient = new QueryClient({
@@ -43,6 +44,7 @@ function App() {
             <Route path="/settings" element={user ? <Settings /> : <Navigate to="/auth" />} />
             <Route path="*" element={<Navigate to="/" />} />
           </Routes>
+          <Analytics />
         </BrowserRouter>
       </ThemeProvider>
     </QueryClientProvider>
