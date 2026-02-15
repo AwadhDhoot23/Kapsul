@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Highlight from '@tiptap/extension-highlight';
@@ -14,6 +14,7 @@ import {
     Highlighter,
     Check
 } from 'lucide-react';
+import TextAlign from '@tiptap/extension-text-align';
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -21,6 +22,8 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { cn } from '@/lib/utils';
+import { Extension } from '@tiptap/core';
+import { Plugin, PluginKey } from '@tiptap/pm/state';
 
 const MenuBar = ({ editor }) => {
     if (!editor) {
@@ -28,11 +31,11 @@ const MenuBar = ({ editor }) => {
     }
 
     const highlightColors = [
-        { name: 'Yellow', value: '#fef08a' }, // yellow-200
-        { name: 'Green', value: '#bbf7d0' },  // green-200
-        { name: 'Blue', value: '#bfdbfe' },   // blue-200
-        { name: 'Pink', value: '#fbcfe8' },   // pink-200
-        { name: 'Purple', value: '#e9d5ff' }, // purple-200
+        { name: 'Yellow', value: '#fef08a' },
+        { name: 'Green', value: '#bbf7d0' },
+        { name: 'Blue', value: '#bfdbfe' },
+        { name: 'Pink', value: '#fbcfe8' },
+        { name: 'Purple', value: '#e9d5ff' },
     ];
 
     return (
@@ -132,18 +135,58 @@ const MenuBar = ({ editor }) => {
     );
 };
 
-export const RichTextEditor = ({ content, onChange, placeholder }) => {
+// Custom Extension to handle Image Paste/Drop events and bubble them up
+const ImagePasteHandler = Extension.create({
+    name: 'imagePasteHandler',
+
+    addProseMirrorPlugins() {
+        return [
+            new Plugin({
+                key: new PluginKey('imagePasteHandler'),
+                props: {
+                    handlePaste: (view, event, slice) => {
+                        const items = Array.from(event.clipboardData?.items || []);
+                        const images = items.filter(item => item.type.indexOf('image') === 0);
+
+                        if (images.length > 0) {
+                            event.preventDefault();
+                            images.forEach(item => {
+                                const file = item.getAsFile();
+                                if (file && this.options.onImagePaste) {
+                                    this.options.onImagePaste(file);
+                                }
+                            });
+                            return true;
+                        }
+                        return false;
+                    },
+                    handleDrop: (view, event, slice, moved) => {
+                        const items = Array.from(event.dataTransfer?.files || []);
+                        const images = items.filter(item => item.type.indexOf('image') === 0);
+
+                        if (images.length > 0) {
+                            event.preventDefault();
+                            images.forEach(file => {
+                                if (this.options.onImagePaste) {
+                                    this.options.onImagePaste(file);
+                                }
+                            });
+                            return true;
+                        }
+                        return false;
+                    }
+                },
+            }),
+        ];
+    },
+});
+
+export const RichTextEditor = ({ content, onChange, placeholder, onImagePaste }) => {
     const editor = useEditor({
         extensions: [
             StarterKit.configure({
-                bulletList: {
-                    keepMarks: true,
-                    keepAttributes: false,
-                },
-                orderedList: {
-                    keepMarks: true,
-                    keepAttributes: false,
-                },
+                bulletList: { keepMarks: true, keepAttributes: false },
+                orderedList: { keepMarks: true, keepAttributes: false },
             }),
             Placeholder.configure({
                 placeholder: placeholder || 'Write something...',
@@ -151,8 +194,13 @@ export const RichTextEditor = ({ content, onChange, placeholder }) => {
             }),
             TextStyle,
             Color,
-            Highlight.configure({
-                multicolor: true,
+            Highlight.configure({ multicolor: true }),
+            TextAlign.configure({
+                types: ['heading', 'paragraph'],
+            }),
+            // Register custom paste handler
+            ImagePasteHandler.configure({
+                onImagePaste: onImagePaste
             }),
         ],
         content: content,
@@ -195,7 +243,8 @@ export const RichTextEditor = ({ content, onChange, placeholder }) => {
                     list-style-type: decimal !important;
                 }
             `}</style>
-            <div className="border border-zinc-200 dark:border-zinc-800 rounded-md overflow-hidden focus-within:ring-2 focus-within:ring-zinc-900 dark:focus-within:ring-zinc-100">
+
+            <div className="border border-zinc-200 dark:border-zinc-800 rounded-md overflow-hidden focus-within:ring-2 focus-within:ring-zinc-900 dark:focus-within:ring-zinc-100 relative z-0">
                 <MenuBar editor={editor} />
                 <EditorContent editor={editor} />
             </div>

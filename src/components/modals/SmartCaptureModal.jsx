@@ -13,13 +13,14 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { Video, Link as LinkIcon, FileText, ListVideo, X, Loader2, ScanLine } from 'lucide-react';
+import { Video, Link as LinkIcon, FileText, ListVideo, X, Loader2, ScanLine, Image as ImageIcon } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { addItem } from '@/lib/firestore';
 import { useAuthStore } from '@/store/authStore';
 import { toast } from 'sonner';
 import { RichTextEditor } from '@/components/editor/RichTextEditor';
 import { fetchVideoDetails, fetchPlaylistDetails } from '@/lib/youtube';
-import { cn } from '@/lib/utils';
+import { cn, compressImage } from '@/lib/utils';
 
 export function SmartCaptureModal({ isOpen, onClose, initialTab }) {
     const user = useAuthStore((state) => state.user);
@@ -36,6 +37,9 @@ export function SmartCaptureModal({ isOpen, onClose, initialTab }) {
     const [isLoading, setIsLoading] = useState(false);
     const [isFetchingMetadata, setIsFetchingMetadata] = useState(false);
 
+    // IMAGE GALLERY STATE
+    const [images, setImages] = useState([]);
+    const [isUploadingImage, setIsUploadingImage] = useState(false);
 
     // Predefined tag suggestions
     const tagSuggestions = ['Work', 'Personal', 'Learning', 'Important', 'Later'];
@@ -63,6 +67,9 @@ export function SmartCaptureModal({ isOpen, onClose, initialTab }) {
 
     // Mock existing tags (will be fetched from Firestore later)
     const existingTags = ['React', 'Tutorial', 'Web Dev', 'JavaScript', 'Design'];
+
+    // Animation State
+    const [flyingImage, setFlyingImage] = useState(null);
 
     // Auto-fetch Metadata when URL changes
     useEffect(() => {
@@ -142,6 +149,32 @@ export function SmartCaptureModal({ isOpen, onClose, initialTab }) {
         setSelectedTags(selectedTags.filter(tag => tag !== tagToRemove));
     };
 
+    // IMAGE UPLOAD HANDLER
+    const handleImageUpload = async (file) => {
+        if (!user) {
+            toast.error('You must be logged in to upload images');
+            return;
+        }
+        setIsUploadingImage(true);
+        const toastId = toast.loading('Processing image...');
+        try {
+            const base64 = await compressImage(file); // Compress & Convert to Base64
+            setImages(prev => [...prev, base64]);
+
+            // Trigger animation
+            setFlyingImage(base64);
+            setTimeout(() => setFlyingImage(null), 1000);
+
+            toast.success('Image added!', { id: toastId });
+        } catch (error) {
+            console.error('Error processing image:', error);
+            toast.error('Failed to process image', { id: toastId });
+        } finally {
+            setIsUploadingImage(false);
+        }
+    };
+
+
     // Validate form based on tab
     const validateForm = () => {
         if (activeTab === 'note') {
@@ -150,8 +183,11 @@ export function SmartCaptureModal({ isOpen, onClose, initialTab }) {
                 return false;
             }
             if (!noteContent.trim() || noteContent === '<p></p>') {
-                toast.error('Please write some content for your note');
-                return false;
+                // Allow empty content if there are images
+                if (images.length === 0) {
+                    toast.error('Please write some content or add images');
+                    return false;
+                }
             }
         } else {
             if (!url.trim()) {
@@ -185,6 +221,7 @@ export function SmartCaptureModal({ isOpen, onClose, initialTab }) {
                 title,
                 content: noteContent, // Store HTML
                 preview: plainText.slice(0, 120) + (plainText.length > 120 ? '...' : ''),
+                images: images, // Store the array of image URLs
             };
         } else {
             // For video, link, playlist
@@ -257,6 +294,7 @@ export function SmartCaptureModal({ isOpen, onClose, initialTab }) {
         setTitle('');
         setSelectedTags([]);
         setNewTagInput('');
+        setImages([]);
         // setActiveTab('video'); // Handled by useEffect on open
     };
 
@@ -417,7 +455,8 @@ export function SmartCaptureModal({ isOpen, onClose, initialTab }) {
                                 <RichTextEditor
                                     content={noteContent}
                                     onChange={setNoteContent}
-                                    placeholder="Write your thoughts, ideas, or anything you want to remember..."
+                                    placeholder="Write your thoughts, ideas, or paste images..."
+                                    onImagePaste={handleImageUpload}
                                 />
                             </div>
                         </TabsContent>
@@ -535,22 +574,55 @@ export function SmartCaptureModal({ isOpen, onClose, initialTab }) {
                 </div>
 
                 {/* Footer with elevated design */}
-                <div className="px-8 py-6 border-t-2 border-zinc-900 dark:border-zinc-100 flex justify-end gap-4 bg-zinc-50 dark:bg-zinc-950">
-                    <Button
-                        variant="outline"
-                        onClick={onClose}
-                        disabled={isLoading}
-                        className="border-2 border-zinc-300 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-900 font-semibold h-11 px-6"
-                    >
-                        Cancel
-                    </Button>
-                    <Button
-                        onClick={handleSave}
-                        disabled={isLoading}
-                        className="bg-zinc-950 dark:bg-zinc-50 hover:bg-zinc-900 dark:hover:bg-zinc-100 text-zinc-50 dark:text-zinc-950 font-bold h-11 px-8 shadow-lg border-2 border-zinc-950 dark:border-zinc-50 transition-all"
-                    >
-                        {isLoading ? 'Saving...' : 'Save'}
-                    </Button>
+                <div className="px-8 py-6 border-t-2 border-zinc-900 dark:border-zinc-100 flex justify-between gap-4 bg-zinc-50 dark:bg-zinc-950 items-center relative">
+
+                    {/* Flying Image Animation Layer */}
+                    <AnimatePresence>
+                        {flyingImage && (
+                            <motion.img
+                                src={flyingImage}
+                                initial={{ opacity: 1, scale: 1, x: 0, y: -200 }}
+                                animate={{ opacity: 0, scale: 0.1, x: -300, y: 0 }}
+                                transition={{ duration: 0.8, ease: "easeInOut" }}
+                                className="absolute right-1/2 top-0 w-24 h-24 object-cover rounded-lg z-50 pointer-events-none shadow-xl border-2 border-white"
+                            />
+                        )}
+                    </AnimatePresence>
+
+                    {/* Image Counter (Left Side) */}
+                    <div>
+                        {activeTab === 'note' && (
+                            <div className="flex items-center gap-2 text-zinc-600 dark:text-zinc-400">
+                                <div className="relative">
+                                    <ImageIcon className="w-5 h-5" />
+                                    {images.length > 0 && (
+                                        <span className="absolute -top-2 -right-2 bg-blue-600 text-white text-[10px] w-4 h-4 flex items-center justify-center rounded-full font-bold">
+                                            {images.length}
+                                        </span>
+                                    )}
+                                </div>
+                                <span className="text-sm font-medium">{images.length} Image{images.length !== 1 ? 's' : ''} saved</span>
+                            </div>
+                        )}
+                    </div>
+
+                    <div className="flex gap-4">
+                        <Button
+                            variant="outline"
+                            onClick={onClose}
+                            disabled={isLoading}
+                            className="border-2 border-zinc-300 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-900 font-semibold h-11 px-6"
+                        >
+                            Cancel
+                        </Button>
+                        <Button
+                            onClick={handleSave}
+                            disabled={isLoading || isUploadingImage}
+                            className="bg-zinc-950 dark:bg-zinc-50 hover:bg-zinc-900 dark:hover:bg-zinc-100 text-zinc-50 dark:text-zinc-950 font-bold h-11 px-8 shadow-lg border-2 border-zinc-950 dark:border-zinc-50 transition-all"
+                        >
+                            {isLoading ? 'Saving...' : isUploadingImage ? 'Uploading...' : 'Save'}
+                        </Button>
+                    </div>
                 </div>
             </DialogContent>
         </Dialog >

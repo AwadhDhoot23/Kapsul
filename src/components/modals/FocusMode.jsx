@@ -21,8 +21,11 @@ import {
     ListVideo,
     Link as LinkIcon,
     Clock,
-    User
+    User,
+    Image as ImageIcon,
+    Plus
 } from 'lucide-react';
+import { compressImage } from '@/lib/utils';
 import { updateItem, deleteItem } from '@/lib/firestore';
 import { toast } from 'sonner';
 import { cn, formatRelativeTime } from '@/lib/utils';
@@ -253,14 +256,17 @@ function NoteFocusView({ item, onClose }) {
     const [title, setTitle] = useState(item.title || '');
     const [content, setContent] = useState(item.content || '');
     const [tags, setTags] = useState(item.tags || []);
+    const [images, setImages] = useState(item.images || []); // Image Gallery State
+    const [selectedImage, setSelectedImage] = useState(null); // Lightbox State
     const [newTag, setNewTag] = useState('');
     const [isSaving, setIsSaving] = useState(false);
+    const [isUploading, setIsUploading] = useState(false); // Upload loading state
     const queryClient = useQueryClient();
 
     // Auto-save with debounce (reduced to 1s)
     useEffect(() => {
         const timer = setTimeout(async () => {
-            if (title !== item.title || content !== item.content || JSON.stringify(tags) !== JSON.stringify(item.tags)) {
+            if (title !== item.title || content !== item.content || JSON.stringify(tags) !== JSON.stringify(item.tags) || JSON.stringify(images) !== JSON.stringify(item.images)) {
                 setIsSaving(true);
                 try {
                     // Generate preview from content
@@ -273,7 +279,8 @@ function NoteFocusView({ item, onClose }) {
                         title,
                         content,
                         preview,
-                        tags
+                        tags,
+                        images
                     });
                     queryClient.invalidateQueries({ queryKey: ['items'] });
                 } catch (error) {
@@ -285,11 +292,11 @@ function NoteFocusView({ item, onClose }) {
         }, 1000);
 
         return () => clearTimeout(timer);
-    }, [title, content, tags]);
+    }, [title, content, tags, images]);
 
     // Save immediately on close
     const handleClose = async () => {
-        if (title !== item.title || content !== item.content || JSON.stringify(tags) !== JSON.stringify(item.tags)) {
+        if (title !== item.title || content !== item.content || JSON.stringify(tags) !== JSON.stringify(item.tags) || JSON.stringify(images) !== JSON.stringify(item.images)) {
             setIsSaving(true);
             try {
                 // Generate preview from content
@@ -302,7 +309,8 @@ function NoteFocusView({ item, onClose }) {
                     title,
                     content,
                     preview,
-                    tags
+                    tags,
+                    images
                 });
                 queryClient.invalidateQueries({ queryKey: ['items'] });
             } catch (error) {
@@ -310,6 +318,22 @@ function NoteFocusView({ item, onClose }) {
             }
         }
         onClose();
+    };
+
+    const handleImageUpload = async (file) => {
+        setIsUploading(true);
+        const toastId = toast.loading('Processing image...');
+
+        try {
+            const base64 = await compressImage(file);
+            setImages(prev => [...prev, base64]);
+            toast.success('Image added to gallery', { id: toastId });
+        } catch (error) {
+            console.error('Error processing image:', error);
+            toast.error('Failed to process image', { id: toastId });
+        } finally {
+            setIsUploading(false);
+        }
     };
 
     const handleDelete = async () => {
@@ -435,11 +459,89 @@ function NoteFocusView({ item, onClose }) {
                         content={content}
                         onChange={setContent}
                         placeholder="Start writing your note..."
+                        onImagePaste={handleImageUpload}
                     />
+                </div>
+
+                {/* Right Panel - Gallery */}
+                <div className="w-full lg:w-[350px] border-t lg:border-t-0 lg:border-l border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/50 flex flex-col">
+                    <div className="p-4 border-b border-zinc-200 dark:border-zinc-800 flex items-center justify-between bg-white/50 dark:bg-zinc-950/50 backdrop-blur-sm">
+                        <h3 className="font-semibold text-zinc-900 dark:text-zinc-100 flex items-center gap-2 text-sm">
+                            <ImageIcon className="w-4 h-4 text-zinc-500" />
+                            Gallery
+                        </h3>
+                        <Badge variant="outline" className="text-xs bg-white dark:bg-zinc-900 shadow-sm">{images.length}</Badge>
+                    </div>
+
+                    <div className="flex-1 overflow-y-auto p-4 custom-scrollbar">
+                        {images.length > 0 ? (
+                            <div className="grid grid-cols-2 gap-3">
+                                {images.map((img, idx) => (
+                                    <div key={idx} className="group relative aspect-square rounded-xl overflow-hidden border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-sm hover:shadow-md transition-all">
+                                        <img src={img} alt={`Gallery ${idx}`} className="w-full h-full object-cover" />
+                                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 backdrop-blur-[1px]">
+                                            <Button
+                                                variant="secondary"
+                                                size="icon"
+                                                className="h-8 w-8 rounded-full bg-white/90 hover:bg-white text-zinc-900 shadow-sm"
+                                                onClick={() => setSelectedImage(img)}
+                                            >
+                                                <ExternalLink className="w-4 h-4" />
+                                            </Button>
+                                            <Button
+                                                variant="destructive"
+                                                size="icon"
+                                                className="h-8 w-8 rounded-full shadow-sm"
+                                                onClick={() => {
+                                                    if (confirm('Delete this image?')) {
+                                                        const newImages = images.filter((_, i) => i !== idx);
+                                                        setImages(newImages);
+                                                        // Auto-save will trigger via useEffect
+                                                    }
+                                                }}
+                                            >
+                                                <Trash2 className="w-4 h-4" />
+                                            </Button>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="h-full flex flex-col items-center justify-center text-center text-zinc-400 p-8 border-2 border-dashed border-zinc-200 dark:border-zinc-800 rounded-xl bg-zinc-50/50 dark:bg-zinc-900/20">
+                                <ImageIcon className="w-10 h-10 mb-3 opacity-20" />
+                                <p className="text-sm font-medium text-zinc-500">No images yet</p>
+                                <p className="text-xs mt-1 max-w-[180px] text-zinc-400">Paste images in the editor to add them to your gallery</p>
+                            </div>
+                        )}
+                    </div>
                 </div>
 
 
             </div>
+
+            {/* Lightbox */}
+            {selectedImage && (
+                <div
+                    className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4 backdrop-blur-xl"
+                    onClick={() => setSelectedImage(null)}
+                >
+                    <div className="relative max-w-5xl max-h-[90vh] w-full flex items-center justify-center">
+                        <img
+                            src={selectedImage}
+                            alt="Full view"
+                            className="max-w-full max-h-[90vh] object-contain rounded-lg shadow-2xl"
+                        />
+                        <Button
+                            variant="secondary"
+                            size="icon"
+                            className="absolute top-4 right-4 rounded-full bg-white/10 hover:bg-white/20 text-white border-none"
+                            onClick={() => setSelectedImage(null)}
+                        >
+                            <X className="w-5 h-5" />
+                        </Button>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
